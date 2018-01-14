@@ -14,18 +14,19 @@ class PgAdapter():
         (This module is psycopg2 wrapper)
         See: http://initd.org/psycopg/docs/
     """
-    __cashed_query = {} # Cashing loaded query.
+    __cashed_query = {}  # Cashing loaded query.
 
     def __init__(self, dsn):
         self.__con = None
         self.__dsn = dsn
+        self.__auto_commit = False
 
     def __build_cursor(self):
-        if not self.connected():
+        if self.__con is not None:
             self.__con.close()
-        self.__con = psycopg2.connect(self.__dsn)
-        self.__con.autocommit = False
-        return self.__con.curosor(psycopg2.extras.DictCursor)
+        self.__con = psycopg2.connect(**self.__dsn)
+        self.__con.autocommit = self.__auto_commit
+        return self.__con.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     @property
     def auto_commit(self):
@@ -33,7 +34,7 @@ class PgAdapter():
 
     @auto_commit.setter
     def auto_commit(self, value):
-        self.__con.autocommit = value
+        self.__autoc_ommit = value
 
     @property
     def connected(self):
@@ -54,7 +55,7 @@ class PgAdapter():
         with self.__build_cursor() as cur:
             cur.callproc(query, args)
             print(cur.query)
-           saved =True if cur.rowcount > 0 else False
+            saved = True if cur.rowcount > 0 else False
         return saved
 
     def delete(self, query, args):
@@ -86,13 +87,13 @@ class PgAdapter():
             self.__con.rollback()
             self.__con.close()
 
-    def swich_db(self, dsn):
+    def switch_db(self, dsn):
         if dsn is None:
             raise ValueError()
         if self.connected:
             self.__con.close()
             self.__con = None
-        print ('switch {0} to {1}', self.__dsn['dbname'], dsn['dbname'])
+        print ('switch {0} to {1}'.format(self.__dsn['dbname'], dsn['dbname']))
         self.__dsn = dsn
 
     @classmethod
