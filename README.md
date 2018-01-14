@@ -1,0 +1,2 @@
+# pgadapter
+PostgreSQL database adapter
