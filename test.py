@@ -41,8 +41,8 @@ class TestPgAdapter(unittest.TestCase):
             self.db.commit()
 
     def tearDown(self):
+        self.db = PgAdapter(DSN, commit=True)
         self.db.query('DELETE FROM  persons;')
-        self.db.commit()
 
     def test_save_ok(self):
         data = TEST_CASES['test_save_ok'][0]
@@ -55,6 +55,7 @@ class TestPgAdapter(unittest.TestCase):
         with self.assertRaises(psycopg2.IntegrityError):
             for d in data:
                 self.db.save('save_person', d['data'])
+        self.db.rollback()
 
     def test_delete_ok(self):
         deleted = self.db.delete('delete_person', ('test',))
@@ -69,16 +70,28 @@ class TestPgAdapter(unittest.TestCase):
     def test_find_one_ok(self):
         self.db.auto_commit = True
         row = self.db.find_one('find_persons', ('Hanako',))
-        self.assertEqual('Hanako', row['Hanako'])
+        self.assertEqual('Hanako', row['name'])
 
-    # def test_invalid_connection(self):
-    #     dsn = DSN
-    #     dsn['dbname'] = 'hogehoge'
-    #     self.db = PgAdapter(dsn)
-    #     with self.assertRaises(psycopg2.OperationalError):
-    #         self.db.query('SELECT * FROM persons;')
-    #         self.db.save('save_person', ('test', 100))
-    #         self.db.delete('save_person', ('test',))
+    def test_invalid_connection(self):
+        dsn = DSN.copy()
+        dsn['host'] = 'invalid host'
+        self.db = PgAdapter(dsn)
+        with self.assertRaises(psycopg2.OperationalError):
+            self.db.query('SELECT * FROM persons;')
+            self.db.save('save_person', ('test', 100))
+            self.db.delete('save_person', ('test',))
+        self.db.rollback()
+
+    def test_invalid_dsn(self):
+        with self.assertRaises(ValueError):
+            self.db.switch_db(None)
+        with self.assertRaises(KeyError):
+            self.db.switch_db({})
+
+    def test_load_invalid_filepath(self):
+        filepath = 'notfound'
+        with self.assertRaises(FileNotFoundError):
+            PgAdapter.load_sqlfile(filepath)
 
 
 if __name__ == '__main__':
