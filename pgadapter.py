@@ -59,7 +59,7 @@ class PgAdapter():
         with self.__build_cursor() as cur:
             cur.callproc(query, args)
             print(cur.query)
-            saved = True if cur.rowcount > 0 else False
+            saved = True if cur.rowcount >= 0 else False
         return saved
 
     def delete(self, query, args):

@@ -62,6 +62,11 @@ class TestPgAdapter(unittest.TestCase):
         self.db.commit()
         self.assertEqual(deleted, True)
 
+    def test_delete_rowcount_zero(self):
+        deleted = self.db.delete('delete_person', ('Who are you',))
+        self.db.commit()
+        self.assertEqual(deleted, True)
+
     def test_find_ok(self):
         self.db.auto_commit = True
         rows = self.db.find('find_persons', ('Taro',))
