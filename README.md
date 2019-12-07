@@ -2,6 +2,11 @@
 PostgreSQL database adapter  
 This module execute PL/PgSQL.  
 
+### Run Dev DB Server
+```
+> docker-compose -d
+```
+
 ```
 
 # Connection info.
