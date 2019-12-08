@@ -2,9 +2,15 @@
 PostgreSQL database adapter  
 This module execute PL/PgSQL.  
 
-### Run Dev DB Server
+### DB Server
 ```
+Start
+cd ./docker
 > docker-compose -d
+
+Stop
+cd ./docker
+> docker-compose stop
 ```
 
 ```
@@ -13,8 +19,8 @@ This module execute PL/PgSQL.
 dsn = {
     'dbname': 'example',
     'host': 'localhost',
-    'user': 'taro',
-    'password': 'taro'
+    'user': 'ham',
+    'password': 'spam'
 }
 
 # Init db
